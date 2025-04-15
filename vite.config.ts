@@ -5,6 +5,7 @@ import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfil
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill'
 import rollupNodePolyFill from 'rollup-plugin-node-polyfills'
 import path from 'path'
+import { Plugin } from 'rollup'
 
 
 // https://vite.dev/config/
@@ -55,7 +56,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      plugins: [rollupNodePolyFill()],
+      plugins: [(rollupNodePolyFill() as unknown) as Plugin],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
