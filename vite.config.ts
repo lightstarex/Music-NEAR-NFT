@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill'
 import rollupNodePolyFill from 'rollup-plugin-node-polyfills'
+import path from 'path'
 
 
 // https://vite.dev/config/
@@ -11,6 +12,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
+      '@': path.resolve(__dirname, './src'),
       util: 'rollup-plugin-node-polyfills/polyfills/util',
       sys: 'util',
       events: 'rollup-plugin-node-polyfills/polyfills/events',
@@ -53,7 +55,17 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      plugins: [rollupNodePolyFill()]
+      plugins: [rollupNodePolyFill()],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+        },
+      },
     }
-  }
+  },
+  server: {
+    headers: {
+      'Content-Type': 'application/javascript',
+    },
+  },
 })
