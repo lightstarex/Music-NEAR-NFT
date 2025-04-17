@@ -1,3 +1,5 @@
+import nearLogo from '../../assets/near_logo.svg';
+
 const Footer = () => {
   return (
     <footer className="bg-white/80 backdrop-blur-sm border-t border-white/20 py-6">
@@ -15,9 +17,9 @@ const Footer = () => {
             </a>
           </p>
           <img
-            src="../assets/near-logo.jpg"
+            src={nearLogo}
             alt="NEAR Protocol"
-            className="h-5 w-5"
+            className="h-5 w-5 transition-transform hover:scale-110"
           />
         </div>
       </div>
