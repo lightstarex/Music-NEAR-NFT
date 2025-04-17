@@ -190,7 +190,7 @@ const NFTDetails = ({ nft = dummyNFT }: NFTDetailsProps) => {
                 </section>
 
                 {/* Artist Payout Section */}
-                <section className="border-t border-gray-200 pt-8">
+                {/* <section className="border-t border-gray-200 pt-8">
                   <button
                     onClick={() => setShowPaypalInfo(!showPaypalInfo)}
                     className="text-indigo-600 hover:text-indigo-700 font-medium"
@@ -205,7 +205,7 @@ const NFTDetails = ({ nft = dummyNFT }: NFTDetailsProps) => {
                       </p>
                     </div>
                   )}
-                </section>
+                </section> */}
               </div>
             </div>
           </Transition>
