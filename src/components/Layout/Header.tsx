@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useNear } from '../../contexts/NearContext';
+import synphonicLogo from '../../assets/synpjonic-verticle.png';
 
 const Header = () => {
   const { isSignedIn, signIn, signOut, accountId, balance } = useNear();
@@ -8,15 +9,23 @@ const Header = () => {
     <header className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-cyan-100/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo and Navigation */}
-          <div className="flex items-center space-x-8">
+          {/* Logo */}
+          <div className="flex-shrink-0">
             <Link to="/" className="flex items-center space-x-2">
               <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">
-                Music NFT Marketplace
+                Music NFT
               </span>
+              <img
+                src={synphonicLogo}
+                alt="Synphonic"
+                className="h-20 object-contain"
+              />
             </Link>
+          </div>
 
-            <nav className="hidden md:flex space-x-8">
+          {/* Navigation */}
+          <div className="flex-1 flex justify-center">
+            <nav className="hidden md:flex space-x-10">
               <Link
                 to="/"
                 className="text-cyan-900 hover:text-cyan-600 transition-colors font-medium"
@@ -33,7 +42,7 @@ const Header = () => {
           </div>
 
           {/* Wallet Connection */}
-          <div className="flex items-center space-x-4">
+          <div className="flex-shrink-0 flex items-center space-x-4">
             {isSignedIn ? (
               <div className="flex items-center space-x-6">
                 <div className="hidden md:block">
