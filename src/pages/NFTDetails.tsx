@@ -160,17 +160,6 @@ const NFTDetails = ({ nft = dummyNFT }: NFTDetailsProps) => {
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold mb-4">About the Artist</h2>
-                  <div className="prose max-w-none text-gray-700">
-                    <p>
-                      "City of Solitude" is being created by an artistic team working under a pseudonym of "The
-                      Dystopians" for this project. They have songwriting experience for musical theatre and are
-                      excited to bring a unique blend of tech and music experience to this project.
-                    </p>
-                  </div>
-                </section>
-
-                <section>
                   <h2 className="text-2xl font-bold mb-4">What You'll Get</h2>
                   <ul className="grid gap-4">
                     {[
