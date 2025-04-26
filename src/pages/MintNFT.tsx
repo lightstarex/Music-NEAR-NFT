@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNear } from '../contexts/NearContext';
+import { useWalletSelector } from '../contexts/WalletSelectorContext';
+import { mintNFT } from '../services/near';
 
 const MintNFT = () => {
   const [formData, setFormData] = useState({
@@ -14,8 +15,12 @@ const MintNFT = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [mp3PreviewUrl, setMp3PreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [isTestMode] = useState(false);
 
-  const { isSignedIn, signIn } = useNear();
+  const { selector, modal, accountId, loading } = useWalletSelector();
+
+  const isSignedIn = !!accountId;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,17 +56,90 @@ const MintNFT = () => {
     setMp3PreviewUrl(null);
   };
 
+  const signIn = () => {
+    modal.show();
+  };
+
+  const signOut = async () => {
+    const wallet = await selector.wallet();
+    await wallet.signOut();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSignedIn) {
       signIn();
       return;
     }
+    
+    if (!mp3File || !coverImage) {
+      setLocalError('Please select both MP3 and cover image files');
+      return;
+    }
+    
     setIsUploading(true);
+    setLocalError(null); // Clear previous errors
+    
     try {
-      console.log('Minting NFT with price:', formData.price, 'NEAR');
+      // In test mode, simulate successful minting
+      if (isTestMode) {
+        // Wait 2 seconds to simulate network request
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Clear the form after successful minting
+        setFormData({
+          artistName: '',
+          title: '',
+          description: '',
+          numberOfCopies: 1,
+          price: 0.1,
+        });
+        
+        setMp3File(null);
+        setCoverImage(null);
+        setPreviewUrl(null);
+        setMp3PreviewUrl(null);
+        
+        // Show success message
+        alert('Test Mode: NFT minted successfully (simulated)!');
+        return;
+      }
+      
+      // Get the wallet
+      const wallet = await selector.wallet();
+      
+      // Real minting logic for non-test mode
+      await mintNFT(
+        wallet,
+        mp3File,
+        coverImage,
+        {
+          title: formData.title,
+          description: formData.description,
+          copies: formData.numberOfCopies,
+          price: formData.price.toString(),
+        }
+      );
+      
+      // Clear the form after successful minting
+      setFormData({
+        artistName: '',
+        title: '',
+        description: '',
+        numberOfCopies: 1,
+        price: 0.1,
+      });
+      
+      setMp3File(null);
+      setCoverImage(null);
+      setPreviewUrl(null);
+      setMp3PreviewUrl(null);
+      
+      // Show success message
+      alert('NFT minted successfully!');
     } catch (error) {
       console.error('Error minting NFT:', error);
+      setLocalError(`Error minting NFT: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsUploading(false);
     }
@@ -78,18 +156,81 @@ const MintNFT = () => {
     };
   }, [previewUrl, mp3PreviewUrl]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="p-4 rounded-lg text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading NEAR wallet...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-4">
             Mint Your Music NFT
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 mb-6">
             Transform your music into unique digital assets
           </p>
+          
+          {/* Wallet Connection Status */}
+          <div className="flex justify-center mb-2">
+            {isSignedIn ? (
+              <div className="flex items-center bg-green-50 text-green-700 px-4 py-2 rounded-full border border-green-200">
+                <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                <span className="mr-2 font-medium">Connected: {accountId}</span>
+                <button 
+                  onClick={signOut}
+                  className="ml-2 text-sm bg-white hover:bg-red-50 text-red-600 px-2 py-1 rounded-md transition-colors"
+                >
+                  Disconnect
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={signIn}
+                className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Connect NEAR Wallet
+              </button>
+            )}
+          </div>
+          
+          {isTestMode && (
+            <div className="inline-block bg-yellow-50 text-yellow-800 text-xs px-2 py-1 rounded-md border border-yellow-200">
+              Test Mode Enabled
+            </div>
+          )}
         </div>
+
+        {/* Error Messages */}
+        {localError && (
+          <div className="mb-6 p-4 rounded-lg bg-red-50 text-red-700 border border-red-200">
+            <div className="flex">
+              <svg className="w-5 h-5 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="font-medium">There was an error</p>
+                <p className="text-sm mt-1">{localError}</p>
+                {isTestMode && (
+                  <p className="text-sm mt-2">
+                    Test mode is active. NFT minting will be simulated.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Main Form Card */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/20">
@@ -248,7 +389,7 @@ const MintNFT = () => {
                         <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                       </div>
                       <input
-                        id="cover-image-upload"
+                        id="image-upload"
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
@@ -258,18 +399,10 @@ const MintNFT = () => {
                     </label>
                   )}
                 </div>
-                {coverImage && (
-                  <p className="text-sm text-indigo-600 font-medium flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {coverImage.name}
-                  </p>
-                )}
               </div>
             </div>
 
-            {/* Number of Copies and Price */}
+            {/* NFT Settings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -279,7 +412,7 @@ const MintNFT = () => {
                   type="number"
                   min="1"
                   value={formData.numberOfCopies}
-                  onChange={(e) => setFormData({ ...formData, numberOfCopies: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, numberOfCopies: parseInt(e.target.value) || 1 })}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50"
                   required
                 />
@@ -289,34 +422,28 @@ const MintNFT = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Price (NEAR)
                 </label>
-                <div className="relative">
                   <input
                     type="number"
-                    step="0.1"
-                    min="0.1"
+                  step="0.01"
+                  min="0.01"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0.1 })}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white/50"
                     required
                   />
-                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    NEAR
-                  </div>
-                </div>
               </div>
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div>
               <button
                 type="submit"
                 disabled={isUploading}
                 className={`w-full py-4 px-6 rounded-xl text-white font-semibold transition-all
-                  ${isSignedIn
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
-                    : 'bg-gray-400 cursor-not-allowed'
-                  }
-                  ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  ${isUploading
+                    ? 'bg-indigo-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+                  }`}
               >
                 {isUploading ? (
                   <div className="flex items-center justify-center">
@@ -326,10 +453,8 @@ const MintNFT = () => {
                     </svg>
                     Minting NFT...
                   </div>
-                ) : isSignedIn ? (
-                  'Mint NFT'
                 ) : (
-                  'Connect Wallet to Mint'
+                  isSignedIn ? 'Mint NFT' : 'Connect Wallet to Mint'
                 )}
               </button>
             </div>

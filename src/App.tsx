@@ -1,12 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import MintNFT from './pages/MintNFT';
-import { NearProvider } from './contexts/NearContext';
+import { WalletSelectorContextProvider } from './contexts/WalletSelectorContext';
 import Marketplace from './pages/Marketplace';
+import '@near-wallet-selector/modal-ui/styles.css';
 
 function App() {
   return (
-    <NearProvider>
+    <WalletSelectorContextProvider>
       <Router>
         <Layout>
           <Routes>
@@ -15,7 +16,7 @@ function App() {
           </Routes>
         </Layout>
       </Router>
-    </NearProvider>
+    </WalletSelectorContextProvider>
   );
 }
 

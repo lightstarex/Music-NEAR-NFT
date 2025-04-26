@@ -11,13 +11,28 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
+    "@near-wallet-selector/core": "^8.10.2",
+    "@near-wallet-selector/default-wallets": "^8.1.4",
+    "@near-wallet-selector/meteor-wallet": "^8.10.2",
+    "@near-wallet-selector/modal-ui": "^8.10.2",
+    "@near-wallet-selector/my-near-wallet": "^8.10.2",
+    "@near-wallet-selector/near-wallet": "^8.9.3",
+    "@near-wallet-selector/sender": "^8.10.2",
     "@pinata/sdk": "^2.1.0",
     "@tailwindcss/vite": "^4.1.4",
     "axios": "^1.6.2",
-    "near-api-js": "^2.1.4",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.1",
+    "events": "^3.3.0",
+    "near-api-js": "^4.0.4",
+    "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.1"
+    "react-router-dom": "^6.20.1",
+    "rxjs": "^7.8.2",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
@@ -36,6 +51,7 @@
     "rollup-plugin-node-polyfills": "^0.2.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.3.3",
-    "vite": "^5.0.6"
+    "vite": "^5.4.18",
+    "vite-plugin-node-polyfills": "^0.23.0"
   }
 }

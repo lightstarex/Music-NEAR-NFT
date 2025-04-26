@@ -23,6 +23,25 @@ pub struct Token {
     pub token_id: String,
 }
 
+// Add this struct for JSON serialization of Token
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct JsonToken {
+    pub token_id: String,
+    pub owner_id: AccountId,
+    pub metadata: NFTMetadata,
+}
+
+impl From<Token> for JsonToken {
+    fn from(token: Token) -> Self {
+        JsonToken {
+            token_id: token.token_id,
+            owner_id: token.owner_id,
+            metadata: token.metadata,
+        }
+    }
+}
+
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct Contract {
@@ -90,6 +109,27 @@ impl Contract {
 
     pub fn get_token_metadata(&self, token_id: String) -> Option<NFTMetadata> {
         self.token_metadata.get(&token_id)
+    }
+
+    // Added method to get all tokens with pagination
+    pub fn get_all_tokens(&self, from_index: Option<U128>, limit: Option<U64>) -> Vec<JsonToken> {
+        let start = u128::from(from_index.unwrap_or(U128(0)));
+        let limit = u64::from(limit.unwrap_or(U64(50)));
+        
+        self.tokens
+            .keys()
+            .skip(start as usize)
+            .take(limit as usize)
+            .map(|token_id| {
+                let token = self.tokens.get(&token_id).unwrap();
+                JsonToken::from(token)
+            })
+            .collect()
+    }
+
+    // Added method to get total supply of tokens
+    pub fn get_total_tokens(&self) -> U128 {
+        U128(self.tokens.len() as u128)
     }
 }
 

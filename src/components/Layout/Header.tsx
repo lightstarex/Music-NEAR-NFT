@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom';
-import { useNear } from '../../contexts/NearContext';
+import { useWalletSelector } from '../../contexts/WalletSelectorContext';
 import synphonicLogo from '../../assets/synpjonic-verticle.png';
 
 const Header = () => {
-  const { isSignedIn, signIn, signOut, accountId, balance } = useNear();
+  const { selector, modal, accountId, accounts, loading, signOut } = useWalletSelector();
+
+  const handleSignIn = () => {
+    modal.show();
+  };
 
   return (
     <header className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-cyan-100/20">
@@ -43,15 +47,14 @@ const Header = () => {
 
           {/* Wallet Connection */}
           <div className="flex-shrink-0 flex items-center space-x-4">
-            {isSignedIn ? (
+            {accountId ? (
               <div className="flex items-center space-x-6">
                 <div className="hidden md:block">
                   <div className="text-sm font-medium text-cyan-900">
-                    {accountId?.split('.')[0]}
+                    {accountId.split('.')[0]}
                   </div>
-                  <div className="text-sm font-bold text-cyan-600">
-                    {balance} NEAR
-                  </div>
+                  {/* Balance isn't immediately available with wallet selector, would need 
+                     to be fetched separately */}
                 </div>
                 <button
                   onClick={signOut}
@@ -62,10 +65,11 @@ const Header = () => {
               </div>
             ) : (
               <button
-                onClick={signIn}
+                onClick={handleSignIn}
+                disabled={loading}
                 className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-6 py-2 rounded-xl transition-all shadow-md hover:shadow-lg"
               >
-                Connect Wallet
+                {loading ? "Loading..." : "Connect Wallet"}
               </button>
             )}
 
