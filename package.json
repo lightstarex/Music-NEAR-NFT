@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npm install --legacy-peer-deps && tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -25,7 +25,7 @@
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "events": "^3.3.0",
-    "near-api-js": "^2.1.4",
+    "near-api-js": "^4.0.4",
     "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
