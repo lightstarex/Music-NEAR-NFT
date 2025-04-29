@@ -4,7 +4,7 @@ import { createHash } from 'crypto-browserify';
 import type { Wallet } from '@near-wallet-selector/core';
 
 // Contract configuration
-export const CONTRACT_NAME = 'dev-1586541282428-987654'; // Fixed dummy contract name
+export const CONTRACT_NAME = import.meta.env.VITE_CONTRACT_NAME; // Fixed dummy contract name
 const TEST_MODE = false; // Should match the value in NearContext.tsx
 
 export interface NFTMetadata {

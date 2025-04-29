@@ -8,7 +8,7 @@ import { setupDefaultWallets } from "@near-wallet-selector/default-wallets";
 import type { WalletSelector, NetworkId } from "@near-wallet-selector/core";
 import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 
-const CONTRACT_NAME = 'dev-1586541282428-987654';
+const CONTRACT_NAME = import.meta.env.VITE_CONTRACT_NAME;
 
 // Initialize the wallet selector
 export async function initWalletSelector(): Promise<{

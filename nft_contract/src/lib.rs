@@ -94,17 +94,18 @@ impl Contract {
         }
 
         let buyer_id = env::predecessor_account_id();
+        let previous_owner_id = token.owner_id.clone();
         let mut new_token = token;
         new_token.owner_id = buyer_id;
         
         self.tokens.insert(&token_id, &new_token);
         
         // Transfer the payment to the previous owner
-        Promise::new(token.owner_id).transfer(price);
+        Promise::new(previous_owner_id).transfer(price);
     }
 
-    pub fn get_token(&self, token_id: String) -> Option<Token> {
-        self.tokens.get(&token_id)
+    pub fn get_token(&self, token_id: String) -> Option<JsonToken> {
+        self.tokens.get(&token_id).map(JsonToken::from)
     }
 
     pub fn get_token_metadata(&self, token_id: String) -> Option<NFTMetadata> {
