@@ -47,9 +47,9 @@ export const initNear = async () => {
 };
 
 /**
- * Calculates SHA-256 hash of a file and returns it as a byte array
+ * Calculates SHA-256 hash of a file and returns it as a byte array of exactly 32 bytes
  * @param file - The file to hash
- * @returns Promise<number[]> Array of 32 bytes
+ * @returns Promise<number[]> Array of exactly 32 bytes
  */
 export const calculateFileHash = async (file: File): Promise<number[]> => {
     return new Promise((resolve, reject) => {
@@ -64,7 +64,13 @@ export const calculateFileHash = async (file: File): Promise<number[]> => {
                 const hash = createHash('sha256');
                 hash.update(new Uint8Array(arrayBuffer));
                 const hashBuffer = hash.digest();
+                
+                // Ensure we have exactly 32 bytes
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
+                if (hashArray.length !== 32) {
+                    throw new Error(`Hash length is ${hashArray.length}, expected 32 bytes`);
+                }
+                
                 resolve(hashArray);
             } catch (error) {
                 reject(error);
@@ -194,6 +200,11 @@ export const buyNFT = async (wallet: Wallet, tokenId: string, price: string) => 
             };
         }
         
+        // Convert price to yoctoNEAR if it's not already in that format
+        const priceInYocto = price.includes('e') ? 
+            price : 
+            (BigInt(Math.floor(parseFloat(price) * 1e24))).toString();
+
         // Call the contract using wallet selector
         const result = await wallet.signAndSendTransaction({
             signerId: wallet.id,
@@ -207,7 +218,7 @@ export const buyNFT = async (wallet: Wallet, tokenId: string, price: string) => 
                             token_id: tokenId,
                         },
                         gas: "300000000000000",
-                        deposit: price ? (parseFloat(price) * 10**24).toString() : "0"
+                        deposit: priceInYocto
                     }
                 }
             ]

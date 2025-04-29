@@ -5,7 +5,7 @@ import { useWalletSelector } from '../contexts/WalletSelectorContext';
 import { Contract, connect, keyStores } from 'near-api-js';
 
 // Using the correct contract name
-const CONTRACT_NAME = 'nft.devmp3.testnet';
+const CONTRACT_NAME = import.meta.env.VITE_CONTRACT_NAME;
 
 interface NFT {
   id: string;

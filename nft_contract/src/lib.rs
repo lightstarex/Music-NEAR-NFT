@@ -16,7 +16,8 @@ pub struct NFTMetadata {
     pub cover_photo: String,
 }
 
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
 pub struct Token {
     pub owner_id: AccountId,
     pub metadata: NFTMetadata,
@@ -58,17 +59,24 @@ impl Contract {
         }
     }
 
+    pub fn clear_state(&mut self) {
+        assert_eq!(env::predecessor_account_id(), self.owner_id, "Only the owner can clear the state");
+        self.tokens = UnorderedMap::new(b"t");
+    }
+
     #[payable]
     pub fn mint_nft(
         &mut self,
         token_id: String,
         metadata: NFTMetadata,
     ) {
+        assert_eq!(metadata.media_hash.len(), 32, "Media hash must be exactly 32 bytes");
+
         let initial_storage_usage = env::storage_usage();
         
         let token = Token {
             owner_id: env::predecessor_account_id(),
-            metadata: metadata.clone(),
+            metadata,
             token_id: token_id.clone(),
         };
 
