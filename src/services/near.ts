@@ -11,7 +11,7 @@ export interface NFTMetadata {
     title: string;
     description: string;
     media: string;
-    media_hash: string;
+    media_hash: number[];
     copies: number;
     price: string;
     cover_photo: string;
@@ -47,11 +47,11 @@ export const initNear = async () => {
 };
 
 /**
- * Calculates SHA-256 hash of a file and returns it as a Base64 string
+ * Calculates SHA-256 hash of a file and returns it as a byte array
  * @param file - The file to hash
- * @returns Promise<string> Base64 encoded hash
+ * @returns Promise<number[]> Array of 32 bytes
  */
-export const calculateFileHash = async (file: File): Promise<string> => {
+export const calculateFileHash = async (file: File): Promise<number[]> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = async (event) => {
@@ -64,10 +64,8 @@ export const calculateFileHash = async (file: File): Promise<string> => {
                 const hash = createHash('sha256');
                 hash.update(new Uint8Array(arrayBuffer));
                 const hashBuffer = hash.digest();
-                const hashBase64 = btoa(
-                    String.fromCharCode.apply(null, Array.from(new Uint8Array(hashBuffer)))
-                );
-                resolve(hashBase64);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                resolve(hashArray);
             } catch (error) {
                 reject(error);
             }
@@ -128,6 +126,14 @@ export const mintNFT = async (
         // Use a unique token ID based on timestamp
         const tokenId = Date.now().toString();
 
+        // Convert price to yoctoNEAR (1 NEAR = 10^24 yoctoNEAR)
+        const priceInYocto = metadata.price ? 
+            (BigInt(Math.floor(parseFloat(metadata.price) * 1e24))).toString() : 
+            "10000000000000000000000";
+
+        // Calculate storage cost (approximately 0.1 NEAR to be safe)
+        const storageCost = "100000000000000000000000";  // 0.1 NEAR
+
         // Call the contract using wallet selector
         const result = await wallet.signAndSendTransaction({
             signerId: wallet.id,
@@ -143,18 +149,16 @@ export const mintNFT = async (
                                 title: metadata.title,
                                 description: metadata.description,
                                 copies: metadata.copies,
-                                price: metadata.price,
+                                price: priceInYocto,
                                 media: mp3Url,
                                 media_hash: mediaHash,
                                 cover_photo: coverUrl,
-                                extra: metadataUrl  // Include the metadata URL in the 'extra' field
+                                extra: metadataUrl
                             },
-                            metadata_url: metadataUrl  // Add the metadata URL as a separate parameter
+                            metadata_url: metadataUrl
                         },
                         gas: "300000000000000",
-                        deposit: metadata.price ? 
-                            (parseFloat(metadata.price) * 10**24).toString() : 
-                            "10000000000000000000000"
+                        deposit: storageCost
                     }
                 }
             ]

@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useNear } from '../contexts/NearContext';
+import { useWalletSelector } from '../contexts/WalletSelectorContext';
 import { useState } from 'react';
 import { NFTType } from '../types/nft';
 import { Transition } from '@headlessui/react';
@@ -24,14 +24,15 @@ interface NFTDetailsProps {
 
 const NFTDetails = ({ nft = dummyNFT }: NFTDetailsProps) => {
   const { id } = useParams();
-  const { isSignedIn, signIn } = useNear();
+  const { selector, accountId, modal } = useWalletSelector();
+  const isSignedIn = !!accountId;
   const [isLoading, setIsLoading] = useState(false);
   const [showPaypalInfo, setShowPaypalInfo] = useState(false);
   const [showSideSlider, setShowSideSlider] = useState(true);
 
   const handleGetNFT = async () => {
     if (!isSignedIn) {
-      signIn();
+      modal.show();
       return;
     }
 

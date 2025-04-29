@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import NFTDetails from './NFTDetails';
 import { useWalletSelector } from '../contexts/WalletSelectorContext';
+import { Contract, connect, keyStores } from 'near-api-js';
 
-// Using the same contract name as in other files
-const CONTRACT_NAME = 'dev-1586541282428-987654';
+// Using the correct contract name
+const CONTRACT_NAME = 'nft.devmp3.testnet';
 
 interface NFT {
   id: string;
@@ -25,7 +26,7 @@ interface ContractNFT {
     title: string;
     description: string;
     media: string;
-    media_hash: string;
+    media_hash: number[];
     copies: number;
     price: string;
     cover_photo: string;
@@ -50,28 +51,38 @@ const Marketplace = () => {
           return; // Don't load NFTs if user is not signed in
         }
 
-        // TODO: When contract is connected, uncomment this code
-        /*
-        const wallet = await selector.wallet();
-        
-        // Get NFTs using view calls through the wallet
-        const response = await wallet.viewMethod({
-          contractId: CONTRACT_NAME,
-          method: 'get_all_tokens',
-          args: {
-            from_index: "0",
-            limit: "50"
-          }
+        // Initialize NEAR connection
+        const near = await connect({
+          networkId: 'testnet',
+          keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+          nodeUrl: 'https://rpc.testnet.near.org',
         });
 
-        const allTokens = response as ContractNFT[];
+        // Get the account
+        const account = await near.account(accountId!);
+        
+        // Create contract instance
+        const contract = new Contract(
+          account,
+          CONTRACT_NAME,
+          {
+            viewMethods: ['get_all_tokens'],
+            changeMethods: []
+          }
+        );
+
+        // Get NFTs using view calls
+        const allTokens = await (contract as any).get_all_tokens({
+          from_index: "0",
+          limit: "50"
+        }) as ContractNFT[];
 
         // Convert the contract NFTs to our app's NFT format
         const formattedNfts: NFT[] = allTokens.map((token: ContractNFT) => ({
           id: token.token_id,
           title: token.metadata.title,
           artist: token.owner_id,
-          price: token.metadata.price || "0",
+          price: (parseFloat(token.metadata.price) / 1e24).toString(), // Convert from yoctoNEAR to NEAR
           coverImage: token.metadata.cover_photo,
           audioPreview: token.metadata.media,
           copies: { 
@@ -82,10 +93,6 @@ const Marketplace = () => {
         }));
 
         setNfts(formattedNfts);
-        */
-
-        // For now, set empty array until contract is ready
-        setNfts([]);
       } catch (err) {
         console.error("Error fetching NFTs:", err);
         setError(err instanceof Error ? err.message : 'Failed to fetch NFTs');
