@@ -6,25 +6,22 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-near-sdk = "4.0.0"
-serde = { version = "1.0", features = ["derive"] }
+# Remove abi feature
+near-sdk = { version = "5.0.0" }
+serde = "1.0.219"
 serde_json = "1.0"
-borsh = "0.10"
-borsh-derive = "0.10"
+# Update Borsh to a version compatible with near-sdk 5.x
+borsh = "1.1.0"
+borsh-derive = "1.1.0"
 
-[patch.crates-io]
-parity-secp256k1 = { git = "https://github.com/paritytech/rust-secp256k1", package = "parity-secp256k1" }
-
+# Modified release profile for better WASM compatibility
 [profile.release]
 codegen-units = 1
-opt-level = "z"
-lto = true
+opt-level = 3  # Changed from "z" to 3 for better compatibility
+lto = "thin"   # Changed from true to "thin"
 debug = false
 panic = "abort"
 overflow-checks = true
-
-[workspace]
-members = []

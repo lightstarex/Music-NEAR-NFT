@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWalletSelector } from '../contexts/WalletSelectorContext';
-import { mintNFT } from '../services/near';
+import { sftMint } from '../services/near';
+import type { Near } from 'near-api-js';
 
 const MintNFT = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ const MintNFT = () => {
   const [localError, setLocalError] = useState<string | null>(null);
   const [isTestMode] = useState(false);
 
-  const { selector, modal, accountId, loading } = useWalletSelector();
+  const { selector, modal, accountId, near, loading } = useWalletSelector();
 
   const isSignedIn = !!accountId;
 
@@ -76,17 +77,29 @@ const MintNFT = () => {
       setLocalError('Please select both MP3 and cover image files');
       return;
     }
+
+    // Validate input
+    if (formData.numberOfCopies < 1) {
+      setLocalError('Number of copies must be at least 1');
+      return;
+    }
+
+    if (formData.price <= 0) {
+      setLocalError('Price must be greater than 0');
+      return;
+    }
+
+    if (!formData.title.trim()) {
+      setLocalError('Title is required');
+      return;
+    }
     
     setIsUploading(true);
-    setLocalError(null); // Clear previous errors
+    setLocalError(null);
     
     try {
-      // In test mode, simulate successful minting
       if (isTestMode) {
-        // Wait 2 seconds to simulate network request
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Clear the form after successful minting
         setFormData({
           artistName: '',
           title: '',
@@ -94,34 +107,39 @@ const MintNFT = () => {
           numberOfCopies: 1,
           price: 0.1,
         });
-        
         setMp3File(null);
         setCoverImage(null);
         setPreviewUrl(null);
         setMp3PreviewUrl(null);
-        
-        // Show success message
         alert('Test Mode: NFT minted successfully (simulated)!');
         return;
       }
       
-      // Get the wallet
       const wallet = await selector.wallet();
+      if (!wallet) {
+        throw new Error("Wallet not selected or unavailable.");
+      }
       
-      // Real minting logic for non-test mode
-      await mintNFT(
+      if (!near) {
+        throw new Error("NEAR connection not available.");
+      }
+      
+      const result = await sftMint(
+        near,
         wallet,
         mp3File,
         coverImage,
         {
-          title: formData.title,
-          description: formData.description,
+          title: formData.title.trim(),
+          description: formData.description.trim(),
           copies: formData.numberOfCopies,
           price: formData.price.toString(),
         }
       );
       
-      // Clear the form after successful minting
+      console.log("SFT Mint Result:", result);
+
+      if (result.success) {
       setFormData({
         artistName: '',
         title: '',
@@ -135,11 +153,26 @@ const MintNFT = () => {
       setPreviewUrl(null);
       setMp3PreviewUrl(null);
       
-      // Show success message
-      alert('NFT minted successfully!');
+        alert('SFT minted successfully!');
+      } else {
+        throw new Error('Minting failed');
+      }
     } catch (error) {
-      console.error('Error minting NFT:', error);
-      setLocalError(`Error minting NFT: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error minting SFT:', error);
+      let errorMessage = 'Unknown error occurred';
+      
+      if (error instanceof Error) {
+        // Handle specific error cases
+        if (error.message.includes('insufficient deposit')) {
+          errorMessage = 'Insufficient funds for storage deposit';
+        } else if (error.message.includes('token class ID already exists')) {
+          errorMessage = 'A token with this title already exists';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setLocalError(`Error minting SFT: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }

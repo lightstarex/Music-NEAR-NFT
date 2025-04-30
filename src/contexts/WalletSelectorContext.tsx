@@ -6,7 +6,8 @@ import { setupMeteorWallet } from '@near-wallet-selector/meteor-wallet';
 import { setupSender } from '@near-wallet-selector/sender';
 import type { AccountState, NetworkId, WalletSelector } from '@near-wallet-selector/core';
 import { distinctUntilChanged, map } from 'rxjs';
-import { CONTRACT_NAME } from '../services/near';
+import { initNear, CONTRACT_NAME } from '../services/near';
+import type { Near, WalletConnection } from 'near-api-js';
 
 // Use the same contract ID as defined in near.ts to ensure consistency
 const CONTRACT_ID = CONTRACT_NAME;
@@ -17,6 +18,8 @@ interface WalletSelectorContextValue {
   modal: ReturnType<typeof setupModal>;
   accounts: Array<AccountState>;
   accountId: string | null;
+  near: Near | null;
+  wallet: WalletConnection | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -27,9 +30,15 @@ export const WalletSelectorContextProvider: React.FC<{ children: React.ReactNode
   const [selector, setSelector] = useState<WalletSelector | null>(null);
   const [modal, setModal] = useState<ReturnType<typeof setupModal> | null>(null);
   const [accounts, setAccounts] = useState<Array<AccountState>>([]);
+  const [near, setNear] = useState<Near | null>(null);
+  const [wallet, setWallet] = useState<WalletConnection | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const init = useCallback(async () => {
+    const { near: nearConnection, wallet: walletConnection } = await initNear();
+    setNear(nearConnection);
+    setWallet(walletConnection);
+
     const _selector = await setupWalletSelector({
       network: NETWORK_ID,
       debug: true,
@@ -91,7 +100,7 @@ export const WalletSelectorContextProvider: React.FC<{ children: React.ReactNode
     await wallet.signOut();
   };
   
-  if (!selector || !modal) {
+  if (loading || !selector || !modal) {
     return null;
   }
   
@@ -102,6 +111,8 @@ export const WalletSelectorContextProvider: React.FC<{ children: React.ReactNode
         modal,
         accounts,
         accountId,
+        near,
+        wallet,
         loading,
         signOut
       }}

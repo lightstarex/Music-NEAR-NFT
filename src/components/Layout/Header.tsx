@@ -42,6 +42,15 @@ const Header = () => {
               >
                 Marketplace
               </Link>
+              {/* Add My NFTs link only if signed in */}
+              {accountId && (
+                  <Link
+                    to="/my-nfts"
+                    className="text-cyan-900 hover:text-cyan-600 transition-colors font-medium"
+                  >
+                    My NFTs
+                  </Link>
+              )}
             </nav>
           </div>
 
@@ -113,6 +122,15 @@ const Header = () => {
             >
               Marketplace
             </Link>
+            {/* Add My NFTs link only if signed in */}
+             {accountId && (
+                  <Link
+                    to="/my-nfts"
+                     className="block px-3 py-2 rounded-xl text-base font-medium text-cyan-900 hover:text-cyan-600 hover:bg-cyan-50/50"
+                  >
+                    My NFTs
+                  </Link>
+              )}
           </div>
         </div>
       </div>

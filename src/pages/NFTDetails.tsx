@@ -1,9 +1,8 @@
 import { useParams } from 'react-router-dom';
-import { useWalletSelector } from '../contexts/WalletSelectorContext';
+import { useNear } from '../contexts/NearContext';
 import { useState } from 'react';
 import { NFTType } from '../types/nft';
 import { Transition } from '@headlessui/react';
-import { buyNFT } from '../services/near';
 
 // Dummy NFT data (replace with actual data later)
 const dummyNFT = {
@@ -25,39 +24,23 @@ interface NFTDetailsProps {
 
 const NFTDetails = ({ nft = dummyNFT }: NFTDetailsProps) => {
   const { id } = useParams();
-  const { selector, accountId, modal } = useWalletSelector();
-  const isSignedIn = !!accountId;
+  const { isSignedIn, signIn } = useNear();
   const [isLoading, setIsLoading] = useState(false);
   const [showPaypalInfo, setShowPaypalInfo] = useState(false);
   const [showSideSlider, setShowSideSlider] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const handleGetNFT = async () => {
     if (!isSignedIn) {
-      modal.show();
+      signIn();
       return;
     }
 
     setIsLoading(true);
-    setError(null);
-
     try {
-      const wallet = await selector.wallet();
-      
-      // Convert price to yoctoNEAR (1 NEAR = 10^24 yoctoNEAR)
-      const priceInYocto = (BigInt(Math.floor(parseFloat(nft.price) * 1e24))).toString();
-
-      // Call the buy_nft function
-      await buyNFT(wallet, nft.id, priceInYocto);
-
-      // Show success message
-      alert('NFT purchased successfully!');
-      
-      // Refresh the page or update the UI as needed
-      window.location.reload();
+      // NFT purchase logic will be implemented here
+      console.log('Purchasing NFT:', id);
     } catch (error) {
       console.error('Error purchasing NFT:', error);
-      setError(error instanceof Error ? error.message : 'Failed to purchase NFT');
     } finally {
       setIsLoading(false);
     }
@@ -112,12 +95,6 @@ const NFTDetails = ({ nft = dummyNFT }: NFTDetailsProps) => {
                     {nft.copies.available} of {nft.copies.total} copies available
                   </p>
                 </div>
-
-                {error && (
-                  <div className="bg-red-50 p-4 rounded-xl">
-                    <p className="text-red-700">{error}</p>
-                  </div>
-                )}
 
                 <div className="space-y-4">
                   <button

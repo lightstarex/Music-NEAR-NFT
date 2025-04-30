@@ -4,6 +4,11 @@ const PINATA_API_KEY = import.meta.env.VITE_PINATA_API_KEY;
 const PINATA_SECRET_KEY = import.meta.env.VITE_PINATA_SECRET_KEY;
 
 export const uploadToPinata = async (file: File): Promise<string> => {
+    // --- DEBUGGING START ---
+    console.log("Pinata API Key Used:", PINATA_API_KEY ? `"${PINATA_API_KEY.substring(0, 5)}..."` : "undefined/empty");
+    console.log("Pinata Secret Key Used:", PINATA_SECRET_KEY ? `"${PINATA_SECRET_KEY.substring(0, 5)}..."` : "undefined/empty");
+    // --- DEBUGGING END ---
+
     const formData = new FormData();
     formData.append('file', file);
 

@@ -1,14 +1,14 @@
 import { setupWalletSelector } from "@near-wallet-selector/core";
+import type { WalletSelector, WalletModuleFactory, Wallet, WalletModule, WalletBehaviourOptions, NetworkId } from "@near-wallet-selector/core";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNearWallet } from "@near-wallet-selector/near-wallet";
 import { setupSender } from "@near-wallet-selector/sender";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
-import { setupDefaultWallets } from "@near-wallet-selector/default-wallets";
-import type { WalletSelector, NetworkId } from "@near-wallet-selector/core";
 import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 
-const CONTRACT_NAME = import.meta.env.VITE_CONTRACT_NAME;
+// Use hardcoded contract name
+const CONTRACT_NAME = "dynamicss.testnet";
 
 // Initialize the wallet selector
 export async function initWalletSelector(): Promise<{
@@ -19,11 +19,10 @@ export async function initWalletSelector(): Promise<{
     network: "testnet" as NetworkId,
     debug: true,
     modules: [
-      setupDefaultWallets(),
-      setupMyNearWallet(),
-      setupMeteorWallet(),
-      setupSender(),
-      setupNearWallet(),
+      setupMyNearWallet() as WalletModuleFactory,
+      setupMeteorWallet() as WalletModuleFactory,
+      setupSender() as WalletModuleFactory,
+      setupNearWallet() as WalletModuleFactory,
     ],
   });
 

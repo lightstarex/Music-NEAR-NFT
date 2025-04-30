@@ -73,7 +73,7 @@ export const NearProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (wallet) {
             try {
                 wallet.requestSignIn({
-                    contractId: import.meta.env.VITE_CONTRACT_NAME, // Use a fixed dummy contract ID
+                    contractId: 'dev-1586541282428-987654', // Use a fixed dummy contract ID
                     methodNames: ['mint_nft', 'buy_nft'],
                 });
             } catch (err) {
