@@ -7,7 +7,8 @@ import { useWalletSelector } from '../contexts/WalletSelectorContext';
 import { 
     getAllSftMetadata, 
     getMarketApprovedSellers, 
-    marketBuySft, 
+    marketBuySft,
+    getAllOwners,
     TokenClassMetadata,
     CONTRACT_NAME
     // Remove unused sftBalanceOf 
@@ -89,9 +90,10 @@ const Marketplace: React.FC = () => {
              // TODO: Implement proper seller discovery mechanism.
              // The current `getMarketApprovedSellers` requires knowing potential seller IDs upfront.
              // This workaround assumes the contract deployer (CONTRACT_NAME) is the only seller.
-            const contractOwner = CONTRACT_NAME; 
-            const potentialSellerIds = [contractOwner]; 
-            
+            const contractOwner = CONTRACT_NAME;
+            const allSellers = await getAllOwners(near);
+            const potentialSellerIds = [contractOwner, ...allSellers]; 
+
             console.log(`Checking potential sellers for ${token_class_id}:`, potentialSellerIds);
             // Ensure near is passed correctly here
             const approvedSellersMap = await getMarketApprovedSellers(near, token_class_id, potentialSellerIds);

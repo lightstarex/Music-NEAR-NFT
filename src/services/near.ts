@@ -6,7 +6,7 @@ import type { Wallet } from '@near-wallet-selector/core';
 import { parseNearAmount } from 'near-api-js/lib/utils/format';
 
 // Use hardcoded contract name
-export const CONTRACT_NAME = "uruwer12.testnet";
+export const CONTRACT_NAME = "uruwer13.testnet";
 
 const TEST_MODE = false; // Should match the value in NearContext.tsx
 
@@ -276,6 +276,41 @@ export const getAllSftMetadata = async (near: Near): Promise<TokenClassMetadata[
     }
 };
 
+export const getAllOwners = async (near: Near): Promise<string[]> => {
+    try {
+        if (!near) {
+            throw new Error("NEAR connection object is required for view calls.");
+        }
+
+        const viewArgs = {
+            // Consider adding pagination args here if needed
+            // from_index: "0", 
+            // limit: 50 
+        };
+
+        const response = await near.connection.provider.query<CodeResult>({
+            request_type: "call_function",
+            finality: "optimistic",
+            account_id: CONTRACT_NAME,
+            method_name: "sft_get_owners", 
+            args_base64: btoa(JSON.stringify(viewArgs))
+        });
+
+        if (response && response.result && response.result.length > 0) { 
+            const resultData = JSON.parse(Buffer.from(response.result).toString());
+
+            return resultData as string[];
+        } else {
+            console.warn("Received no result from sft_get_owners view call");
+            return [];
+        }
+
+    } catch (error) {
+        console.error('Error fetching all onwers:', error);
+        return [];
+    }
+};
+
 // Add the JsonToken type to match the contract's return type for get_all_tokens
 // export interface JsonToken {
 //     token_id: string;
@@ -450,6 +485,7 @@ export const getMarketApprovedSellers = async (
         // Check response.result exists and has length
         if (response && response.result && response.result.length > 0) {
             const resultData = JSON.parse(Buffer.from(response.result).toString());
+
             return resultData as Record<string, string>; 
         } else {
             console.warn(`Received no result from get_market_approved_sellers for ${token_class_id}`);
