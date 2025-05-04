@@ -6,7 +6,7 @@ import type { Wallet } from '@near-wallet-selector/core';
 import { parseNearAmount } from 'near-api-js/lib/utils/format';
 
 // Use hardcoded contract name
-export const CONTRACT_NAME = "dynamicss.testnet";
+export const CONTRACT_NAME = "uruwer12.testnet";
 
 const TEST_MODE = false; // Should match the value in NearContext.tsx
 
@@ -138,7 +138,11 @@ export const sftMint = async (
                 args_base64: btoa(JSON.stringify({ token_class_id }))
             });
             // Check if result exists and is not empty/null JSON
-            metadataExists = response.result && response.result.length > 0 && JSON.parse(Buffer.from(response.result).toString()) !== null;
+            metadataExists =
+                response.result &&
+                response.result.length > 0 &&
+                Array.isArray(JSON.parse(Buffer.from(response.result).toString())) &&
+                JSON.parse(Buffer.from(response.result).toString()).some((item: any) => item !== null);
         } catch (viewError: any) {
             // Handle specific errors like method not found or account not exists if needed
             // near-api-js provider query might throw differently than wallet.viewMethod
@@ -173,7 +177,7 @@ export const sftMint = async (
             token_class_id,
             amount, // Pass amount as string again
             receiver_id,
-            metadata: finalMetadata
+            ...finalMetadata
         };
 
         // Updated log message
@@ -243,8 +247,24 @@ export const getAllSftMetadata = async (near: Near): Promise<TokenClassMetadata[
 
         if (response && response.result && response.result.length > 0) { 
             const resultData = JSON.parse(Buffer.from(response.result).toString());
-            // Type assertion should now work correctly with the updated interface
-            return resultData as TokenClassMetadata[];
+            const result: TokenClassMetadata[] = [];
+
+            for (let i = 0; i < resultData[0].length; i++) {
+                result.push({
+                    token_class_id: resultData[0][i],
+                    metadata: {
+                        title: resultData[1][i],
+                        description: resultData[2][i],
+                        media: resultData[3][i],
+                        media_hash: resultData[4][i],
+                        price_per_copy: resultData[5][i],
+                        cover_photo: resultData[6][i],
+                    },
+                    creator_id: resultData[7][i],
+                });
+            }
+
+            return result as TokenClassMetadata[];
         } else {
             console.warn("Received no result from sft_get_all_metadata view call");
             return [];

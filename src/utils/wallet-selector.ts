@@ -8,7 +8,7 @@ import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 
 // Use hardcoded contract name
-const CONTRACT_NAME = "dynamicss.testnet";
+const CONTRACT_NAME = "uruwer12.testnet";
 
 // Initialize the wallet selector
 export async function initWalletSelector(): Promise<{
