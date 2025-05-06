@@ -196,7 +196,7 @@ const Marketplace: React.FC = () => {
                             
                                 className="w-full text-center text-lg font-bold px-4 py-2 rounded outline outline-solid outline-green-600 hover:outline-green-700 hover:bg-green-100 focus:bg-green-200"
                             >
-                                Copy capotion
+                                Copy caption
                             </button>
                         </CopyToClipboard>
                         <p className='text-lg'>
