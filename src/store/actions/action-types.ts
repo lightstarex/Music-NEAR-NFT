@@ -1,0 +1,1 @@
+export const SEND_ALERT_CONTENT = "SEND_ALERT_CONTENT";

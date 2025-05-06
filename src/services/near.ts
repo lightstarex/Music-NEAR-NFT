@@ -4,6 +4,7 @@ import { createHash } from 'crypto-browserify';
 import type { CodeResult } from 'near-api-js/lib/providers/provider';
 import type { Wallet } from '@near-wallet-selector/core';
 import { parseNearAmount } from 'near-api-js/lib/utils/format';
+import { AppDispatch } from '../store';
 
 // Use hardcoded contract name
 export const CONTRACT_NAME = "uruwer13.testnet";
@@ -506,7 +507,9 @@ export const marketBuySft = async (
     wallet: Wallet,
     token_class_id: string,
     seller_id: string,
-    price: string
+    price: string,
+    dispatch: AppDispatch,
+    changeAlertContent: (text: string) => any
 ): Promise<any> => {
     try {
         if (!wallet) throw new Error("Wallet connection is required.");
@@ -523,7 +526,7 @@ export const marketBuySft = async (
 
         console.log("Calling market_buy_sft with args:", JSON.stringify(callArgs, null, 2));
         const deposit = price;
-
+        dispatch(changeAlertContent(token_class_id));
         const result = await wallet.signAndSendTransaction({
             signerId: accountId,
             receiverId: CONTRACT_NAME,

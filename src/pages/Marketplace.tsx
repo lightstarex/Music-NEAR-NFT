@@ -3,7 +3,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 // import { Dialog } from '@headlessui/react';
 // import NFTDetails from './NFTDetails';
 import { useNear } from '../contexts/NearContext'; // Correct context import
+import { Description, Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { useWalletSelector } from '../contexts/WalletSelectorContext';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 import { 
     getAllSftMetadata, 
     getMarketApprovedSellers, 
@@ -22,17 +24,24 @@ import { WalletConnection } from 'near-api-js'; // Import WalletConnection for t
 // import type { Near } from 'near-api-js';
 // Import Wallet type for the transaction function
 import type { Wallet } from '@near-wallet-selector/core';
+import { useAppSelector, useAppDispatch } from "../store";
+import { changeAlertContent } from '../store/actions/app.action';
 
 // Remove unused DisplaySFT interface
 // interface DisplaySFT { ... }
 
 const Marketplace: React.FC = () => {
+    const dispatch = useAppDispatch();
+    const sharedTitle = useAppSelector((state) => state.app.alertText);
+
     // Get near, accountId, and selector from useWalletSelector
     const { near, accountId, selector } = useWalletSelector(); 
     const [sfts, setSfts] = useState<TokenClassMetadata[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const [buyingClassId, setBuyingClassId] = useState<string | null>(null); // Track which SFT is being bought
+    const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+    const [modalContentText, setModalContentText] = useState<string>(``);
     // Remove unused state related to old UI
     // const [selectedSFT, setSelectedSFT] = useState<DisplaySFT | null>(null);
     // const { accountId: walletSelectorAccountId } = useWalletSelector(); // Remove
@@ -62,6 +71,14 @@ const Marketplace: React.FC = () => {
     useEffect(() => {
         fetchSfts();
     }, [fetchSfts]);
+
+    useEffect(() => {
+        if (sharedTitle) {
+            setIsOpenModal(true);
+            setModalContentText(`Just bought the debut NFT of the upcoming musical ${sharedTitle} - breathtakingly beautiful and haunting. Follow the show's development here - @city\_solitude. And grab your NFT here - `);
+            dispatch(changeAlertContent(""));
+        }
+    }, [])
 
     // Function to handle the buy action
     const handleBuy = async (token_class_id: string, price: string) => {
@@ -109,7 +126,7 @@ const Marketplace: React.FC = () => {
 
             // --- Execute the purchase ---
             // Use the correct Wallet object and remove casting
-            await marketBuySft(wallet, token_class_id, seller_id, price);
+            await marketBuySft(wallet, token_class_id, seller_id, price, dispatch, changeAlertContent);
 
             alert(`Successfully purchased 1 copy of ${token_class_id} from ${seller_id}!`);
             // TODO: Maybe refetch user balance or inventory here
@@ -160,7 +177,43 @@ const Marketplace: React.FC = () => {
                 </div>
             )}
 
-            {/* Remove old modal */}
+            <Dialog open={isOpenModal} onClose={() => setIsOpenModal(false)} className="relative z-50">
+                <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+                    <DialogPanel className="max-w-lg space-y-4 border bg-white p-12 rounded rounded-xl">
+                        <DialogTitle className="font-bold text-4xl text-center">Thanks for your purchase!</DialogTitle>
+                        <div className='w-full'>
+                            <a 
+                                href={`https://twitter.com/intent/tweet?text=${modalContentText} https://music-near-nft.onrender.com/marketplace`}
+                                target='_blank'
+                                className="w-full block text-center text-lg font-bold px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                            >
+                                Share on X
+                            </a>
+                        </div>
+
+                        <CopyToClipboard text={`${modalContentText} https://music-near-nft.onrender.com/marketplace`}>
+                            <button
+                            
+                                className="w-full text-center text-lg font-bold px-4 py-2 rounded outline outline-solid outline-green-600 hover:outline-green-700 hover:bg-green-100 focus:bg-green-200"
+                            >
+                                Copy capotion
+                            </button>
+                        </CopyToClipboard>
+                        <p className='text-lg'>
+                            {modalContentText} <a href="https://music-near-nft.onrender.com/marketplace" style={{color: "#4f46e5"}} target='_blank'>https://music-near-nft.onrender.com/marketplace</a>
+                        </p>
+                        <div className='w-full'>
+                            <a 
+                                href="https://instagram.com"
+                                target='_blank'
+                                className="w-full block text-center text-lg font-bold px-4 py-2 rounded outline outline-solid outline-green-600 hover:outline-green-700 hover:bg-green-100 focus:bg-green-200"
+                            >
+                                Open Instagram app
+                            </a>
+                        </div>
+                    </DialogPanel>
+                </div>
+            </Dialog>
     </div>
   );
 };
