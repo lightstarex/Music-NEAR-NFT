@@ -11,7 +11,7 @@ import type { Near, WalletConnection } from 'near-api-js';
 
 // Use the same contract ID as defined in near.ts to ensure consistency
 const CONTRACT_ID = CONTRACT_NAME;
-const NETWORK_ID = 'testnet' as NetworkId;
+const NETWORK_ID = 'mainnet' as NetworkId;
 
 interface WalletSelectorContextValue {
   selector: WalletSelector;

@@ -8,7 +8,7 @@ import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 
 // Use hardcoded contract name
-const CONTRACT_NAME = "uruwer13.testnet";
+const CONTRACT_NAME = "warmwatch7158.near";
 
 // Initialize the wallet selector
 export async function initWalletSelector(): Promise<{
@@ -16,7 +16,7 @@ export async function initWalletSelector(): Promise<{
   modal: WalletSelectorModal;
 }> {
   const selector = await setupWalletSelector({
-    network: "testnet" as NetworkId,
+    network: "mainnet" as NetworkId,
     debug: true,
     modules: [
       setupMyNearWallet() as WalletModuleFactory,

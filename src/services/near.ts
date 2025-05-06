@@ -7,7 +7,7 @@ import { parseNearAmount } from 'near-api-js/lib/utils/format';
 import { AppDispatch } from '../store';
 
 // Use hardcoded contract name
-export const CONTRACT_NAME = "uruwer13.testnet";
+export const CONTRACT_NAME = "warmwatch7158.near";
 
 const TEST_MODE = false; // Should match the value in NearContext.tsx
 
@@ -24,10 +24,10 @@ export interface NFTMetadata {
 export const initNear = async () => {
     try {
         const near = await connect({
-            networkId: 'testnet',
+            networkId: 'mainnet',
             keyStore: new keyStores.BrowserLocalStorageKeyStore(),
-            nodeUrl: 'https://rpc.testnet.near.org',
-            walletUrl: 'https://wallet.testnet.near.org',
+            nodeUrl: 'https://rpc.mainnet.near.org',
+            walletUrl: 'https://wallet.near.org/',
         });
 
         const wallet = new WalletConnection(near, 'nft-marketplace');

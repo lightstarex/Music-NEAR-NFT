@@ -60,15 +60,15 @@ export const NearProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const signIn = () => {
-        if (TEST_MODE) {
-            console.log('Test mode: Simulating wallet sign in');
-            alert('Test Mode: In a real environment, this would redirect to NEAR wallet for authentication.');
-            // Simulate successful login in test mode
-            setIsSignedIn(true);
-            setAccountId('test-account.testnet');
-            setBalance('50000000000000000000000000'); // 50 NEAR in yoctoNEAR
-            return;
-        }
+        // if (TEST_MODE) {
+        //     console.log('Test mode: Simulating wallet sign in');
+        //     alert('Test Mode: In a real environment, this would redirect to NEAR wallet for authentication.');
+        //     // Simulate successful login in test mode
+        //     setIsSignedIn(true);
+        //     setAccountId('test-account.near');
+        //     setBalance('50000000000000000000000000'); // 50 NEAR in yoctoNEAR
+        //     return;
+        // }
 
         if (wallet) {
             try {
